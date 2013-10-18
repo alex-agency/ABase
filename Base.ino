@@ -4,11 +4,16 @@
 #include "nRF24L01.h"
 #include "RF24.h"
 #include "Mesh.h"
-#include "SimpleMap.h"
 #include "timer.h"
+#include "EtherCard.h"
 
-// Set up nRF24L01 radio on SPI bus pin CE and CS
-RF24 radio(9,10);
+// Declare SPI bus pins
+#define CE_PIN  9
+#define CS_RADIO_PIN  10
+#define CS_ETHERNET_PIN  11
+
+// Set up nRF24L01 radio
+RF24 radio(CE_PIN, CS_RADIO_PIN);
 // Set up Mesh network
 Mesh mesh(radio);
 // Declare radio channel 0-127
@@ -16,9 +21,10 @@ const uint8_t channel = 76;
 // Declare base id, it should be 00
 const uint16_t base_id = 00;
 
-// Declare state map keys
-#define RELAY_1  "relay_1"
-#define RELAY_2  "relay_2"
+// Declare ethernet mac address
+static byte mymac[] = { 0x74,0x69,0x69,0x2D,0x30,0x31 };
+// Declare ethernet buffer
+byte Ethernet::buffer[700];
 
 // Declare delay manager in ms
 timer_t send_timer(7000);
@@ -37,8 +43,22 @@ void setup()
   
   // initialize radio
   radio.begin();
-  // initialize network
+  // initialize mesh radio network
   mesh.begin(channel, base_id);
+
+  // initialize ethernet
+  ether.begin(sizeof Ethernet::buffer, mymac, CS_ETHERNET_PIN);
+  // setup dhcp client
+  bool ok = ether.dhcpSetup();
+  if(ok) {
+    if(DEBUG) {
+      ether.printIp("DHCP: Info: IP: ", ether.myip);
+      ether.printIp("DHCP: Info: Gateway: ", ether.gwip);
+      ether.printIp("DHCP: Info: DNS: ", ether.dnsip);
+    }
+  } else {
+    printf("DHCP: Error: DHCP failed!\n\r");
+  } 
 }
 
 //
@@ -48,7 +68,6 @@ void loop()
 {
   // update network
   mesh.update();
-  
   
   // new message available
   while( mesh.available() ) {

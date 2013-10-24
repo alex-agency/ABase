@@ -47,18 +47,18 @@ void setup()
   mesh.begin(channel, base_id);
 
   // initialize ethernet
-  ether.begin(sizeof Ethernet::buffer, mymac, CS_ETHERNET_PIN);
+  //ether.begin(sizeof Ethernet::buffer, mymac, CS_ETHERNET_PIN);
   // setup dhcp client
-  bool ok = ether.dhcpSetup();
-  if(ok) {
-    if(DEBUG) {
-      ether.printIp("DHCP: Info: IP: ", ether.myip);
-      ether.printIp("DHCP: Info: Gateway: ", ether.gwip);
-      ether.printIp("DHCP: Info: DNS: ", ether.dnsip);
-    }
-  } else {
-    printf("DHCP: Error: DHCP failed!\n\r");
-  } 
+  //bool ok = ether.dhcpSetup();
+  //if(ok) {
+  //  if(DEBUG) {
+  //    ether.printIp("DHCP: Info: IP: ", ether.myip);
+  //    ether.printIp("DHCP: Info: Gateway: ", ether.gwip);
+  //    ether.printIp("DHCP: Info: DNS: ", ether.dnsip);
+  //  }
+  //} else {
+  //  printf("DHCP: Error: DHCP failed!\n\r");
+  //} 
 }
 
 //

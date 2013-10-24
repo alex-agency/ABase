@@ -42,6 +42,9 @@ void RF24Network::begin(uint8_t _channel, uint16_t _node_address )
   int i = 6;
   while (i--)
     radio.openReadingPipe(i,pipe_address(_node_address,i));
+  // Open only pipe 0 for broadcasting
+  // radio have restriction that pipes 1-5 must share the top 32 bits
+  radio.openReadingPipe(0,pipe_address(broadcast,0));
   radio.startListening();
 
   // Spew debugging state about the radio
@@ -73,10 +76,12 @@ void RF24Network::update(void)
       if ( !is_valid_address(header.to_node) )
 	continue;
 
+      // Throw it away if it's sent to himself
+      if( header.from_node == header.to_node )
+  continue;
+
       // Is this for us?
-      if ( header.to_node == node_address || 
-        // accept messages from broadcast address
-        (header.to_node == 0x5555 && header.from_node != header.to_node) )
+      if ( header.to_node == node_address || header.to_node == broadcast )
 	// Add it to the buffer of frames for us
 	enqueue();
       else
@@ -216,8 +221,8 @@ bool RF24Network::write(uint16_t to_node)
   // On which pipe
   uint8_t send_pipe = parent_pipe;
   
-  // If the node is a direct child,
-  if ( is_direct_child(to_node) )
+  // If the node is a direct child, or broadcast
+  if ( is_direct_child(to_node) || to_node == broadcast )
   {
     // Send directly
     send_node = to_node;

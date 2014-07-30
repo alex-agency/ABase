@@ -1,16 +1,16 @@
-
 #ifndef SIMPLEMAP_H
 #define SIMPLEMAP_H
 
+#include <string.h>
+
 template<typename K>
-struct defcmp
-{
+struct defcmp {
   bool operator()(const K& k1, const K& k2) {
     return k1 == k2;
   }
 };
 
-template<typename K, typename V, int capacity, typename comparator = defcmp<K> >
+template<typename K, typename V, uint8_t capacity, typename comparator = defcmp<K> >
 class SimpleMap
 {
   public:
@@ -24,21 +24,21 @@ class SimpleMap
     /**
      * Get the size of this map
      */
-    unsigned int size() const {
+    uint8_t size() const {
       return currentIndex;
     }
 
     /**
      * Get a key at a specified index
      */
-    K keyAt(unsigned int idx) {
+    K keyAt(uint8_t idx) {
       return keys[idx];
     }
 
     /**
      * Get a value at a specified index
      */
-    V valueAt(unsigned int idx) {
+    V valueAt(uint8_t idx) {
       return values[idx];
     }
 
@@ -97,7 +97,7 @@ class SimpleMap
     void remove(K key) {
       int index = indexOf(key);
       if ( contains(key) ) {
-        for (int i = index; i < capacity - 1; i++) {
+        for (uint8_t i = index; i < capacity - 1; i++) {
           keys[i] = keys[i + 1];
           values[i] = values[i + 1];
         }
@@ -109,26 +109,25 @@ class SimpleMap
       nil = nullv;
     }
 
-    const char* toString() const {
-      static char buffer[128];
+    /*const char* toString() const {
+      static char buffer[30];
       strcpy(buffer, "{");
-      for(int i=0; i<currentIndex; i++) {
+      for(uint8_t i=0; i<currentIndex; i++) {
         if (i > 0) {
-          strcat(buffer, ", ");
+          strcat(buffer, PSTR(", "));
         }
-        sprintf(buffer,"%s?=%d", buffer, values[i]); 
+        snprintf_P(buffer,sizeof(buffer),PSTR("%s?=%d"),buffer, values[i]);
       }
-      strcat(buffer, "}");
+      strcat(buffer, PSTR("}"));
       return buffer; 
-    }
+    }*/
 
   private:
     K keys[capacity];
     V values[capacity];
     V nil;
-    int currentIndex;
+    uint8_t currentIndex;
     comparator cmp;
 };
 
-#endif
-// SIMPLEMAP_H
+#endif // __SIMPLEMAP_H__
